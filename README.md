@@ -1,2 +1,2 @@
 # Portality
-Game by Alexander Balcombe and Slade Anderson
+Game by Alexander Balcombe and Slade Andersen
