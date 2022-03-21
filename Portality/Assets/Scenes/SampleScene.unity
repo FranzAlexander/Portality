@@ -351,6 +351,7 @@ GameObject:
   - component: {fileID: 266209905}
   - component: {fileID: 266209904}
   - component: {fileID: 266209903}
+  - component: {fileID: 266209907}
   m_Layer: 0
   m_Name: LeftHand Controller
   m_TagString: Untagged
@@ -845,6 +846,20 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 7779212132400271959, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_ButtonPressPoint: 0.5
+--- !u!114 &266209907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266209901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94341fa26d9fa5c41b82d940d48505a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 1955066509}
+  _handSide: 
 --- !u!1 &670593199
 GameObject:
   m_ObjectHideFlags: 0
@@ -984,6 +999,7 @@ GameObject:
   - component: {fileID: 989650237}
   - component: {fileID: 989650236}
   - component: {fileID: 989650235}
+  - component: {fileID: 989650239}
   m_Layer: 0
   m_Name: RightHand Controller
   m_TagString: Untagged
@@ -1478,6 +1494,20 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 875253871413052681, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_ButtonPressPoint: 0.5
+--- !u!114 &989650239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 989650233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94341fa26d9fa5c41b82d940d48505a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 1955066509}
+  _handSide: 
 --- !u!1 &1665132001
 GameObject:
   m_ObjectHideFlags: 0
@@ -1685,6 +1715,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1955066507}
   - component: {fileID: 1955066506}
+  - component: {fileID: 1955066509}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1724,3 +1755,16 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: -176.683, z: 0}
+--- !u!114 &1955066509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1955066505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1da87d033b73077488f6d41bc5e8c9c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _portal: {fileID: 15629727755015573, guid: 3090536a26f79234faadc1432118a2e7, type: 3}
