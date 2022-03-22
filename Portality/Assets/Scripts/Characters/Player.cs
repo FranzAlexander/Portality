@@ -10,7 +10,6 @@ public class Player : MonoBehaviour
     // First index is left hand, second is for the right hand.
     private GameObject[] _playerPortals;
 
-
     private void Awake()
     {
         _playerPortals = new GameObject[2];
