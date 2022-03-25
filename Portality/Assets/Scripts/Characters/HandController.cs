@@ -10,6 +10,8 @@ public class HandController : MonoBehaviour
     private Player _player;
     private ActionBasedController _controller;
 
+    private Transform _handPos;
+
     [SerializeField]
     private string _handSide;
 
@@ -17,14 +19,15 @@ public class HandController : MonoBehaviour
     void Start()
     {
         _controller = GetComponent<ActionBasedController>();
+        _handPos = GetComponent<Transform>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (_controller.selectAction.action.IsPressed())
+        if (_controller.selectAction.action.triggered)
         {
-            _player.createPortal(_handSide, _controller.rotationAction.action.ReadValue<Quaternion>(), _controller.positionAction.action.ReadValue<Vector3>());
+            _player.createPortal(_handSide, _handPos);
         }
     }
 }
