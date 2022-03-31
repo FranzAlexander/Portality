@@ -15,22 +15,65 @@ public class Portal : MonoBehaviour
     private MeshFilter _portalScreenFilter;
 
 
+    // Holds objects currently teleporting.
+    private List<Teleportable> _teleportables;
+
     // Getters and Setter
     public MeshRenderer PortalScreen { get => _portalScreen; set => _portalScreen = value; }
 
     public Portal OtherPortal;
 
+
     private void Awake()
     {
+        // Cameras.
         _playerCam = Camera.main;
         _portalCam = GetComponentInChildren<Camera>();
+
+        // Rendering.
         _portalScreen = transform.Find("PortalView").GetComponent<MeshRenderer>();
         _portalScreenFilter = _portalScreen.GetComponent<MeshFilter>();
+
+        // Teleportables.
+        _teleportables = new List<Teleportable>();
+    }
+
+    private void FixedUpdate()
+    {
+        UpdateTeleportables();
+    }
+
+    private void UpdateTeleportables()
+    {
+        for (int i = 0; i < _teleportables.Count; ++i)
+        {
+            Teleportable currentTeleportable = _teleportables[i];
+            Vector3 distanceToTeleportable = currentTeleportable.transform.position - transform.position;
+            float dotResult = Vector3.Dot(transform.forward, distanceToTeleportable);
+
+            if (dotResult < 0f)
+            {
+                Debug.Log(dotResult);
+
+                Vector3 oldPosition = currentTeleportable.transform.position;
+                Quaternion oldRotation = currentTeleportable.transform.rotation;
+
+                currentTeleportable.Teleport(transform, OtherPortal.transform, distanceToTeleportable);
+                currentTeleportable.TeleportableClone.transform.SetPositionAndRotation(oldPosition, oldRotation);
+                OtherPortal.HandleTeleportable(currentTeleportable);
+                _teleportables.RemoveAt(i);
+                --i;
+            }
+            else
+            {
+                currentTeleportable.TeleportableClone.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            }
+        }
     }
 
     public void RenderPortal()
     {
-        if (!VisableFromCamera(OtherPortal.PortalScreen, _playerCam))
+        if (!PortalUtility.VisableFromCamera(OtherPortal.PortalScreen, _playerCam))
         {
             return;
         }
@@ -90,9 +133,34 @@ public class Portal : MonoBehaviour
         }
     }
 
-    private bool VisableFromCamera(Renderer renderer, Camera camera)
+    public void HandleTeleportable(Teleportable teleportable)
     {
-        Plane[] franstumPlanes = GeometryUtility.CalculateFrustumPlanes(camera);
-        return GeometryUtility.TestPlanesAABB(franstumPlanes, renderer.bounds);
+        if (!_teleportables.Contains(teleportable))
+        {
+            teleportable.EnterPortal();
+            _teleportables.Add(teleportable);
+        }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Teleportable teleportable = other.GetComponent<Teleportable>();
+
+        if (teleportable)
+        {
+            HandleTeleportable(teleportable);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Teleportable teleportable = other.GetComponent<Teleportable>();
+
+        if (teleportable && _teleportables.Contains(teleportable))
+        {
+            teleportable.ExitPortal();
+            _teleportables.Remove(teleportable);
+        }
+    }
+
 }

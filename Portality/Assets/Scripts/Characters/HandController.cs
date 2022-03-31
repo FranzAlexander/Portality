@@ -25,9 +25,10 @@ public class HandController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_controller.selectAction.action.triggered)
+        if (_controller.selectAction.action.IsPressed())
         {
-            _player.createPortal(_handSide, _handPos);
+            Debug.Log("Grip trigger");
+            //_player.createPortal(_handSide, _handPos);
         }
     }
 }
