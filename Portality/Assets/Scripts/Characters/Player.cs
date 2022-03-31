@@ -4,16 +4,22 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject _portal;
+    // [SerializeField]
+    // private Portal _portal;
 
-    // First index is left hand, second is for the right hand.
-    private GameObject[] _playerPortals;
+    // // First index is left hand, second is for the right hand.
+    // private Portal[] _playerPortals;
 
-    private void Awake()
-    {
-        _playerPortals = new GameObject[2];
-    }
+    // private void Awake()
+    // {
+    //     _playerPortals = new Portal[2]
+    //     {
+    //         Instantiate(_portal, new Vector3(0, 0, 0), Quaternion.identity),
+    //         Instantiate(_portal, new Vector3(0, 0, 0), Quaternion.identity)
+    //     };
+    //     _playerPortals[0].OtherPortal = _playerPortals[1];
+    //     _playerPortals[1].OtherPortal = _playerPortals[0];
+    // }
 
     // Start is called before the first frame update
     void Start()
@@ -27,26 +33,17 @@ public class Player : MonoBehaviour
 
     }
 
-    public void createPortal(string handSide, Quaternion handRotation, Vector3 handPosition)
+    // void OnPreCull()
+    // {
+    //     for (int i = 0; i < _playerPortals.Length; i++)
+    //     {
+    //         _playerPortals[i].RenderPortal();
+    //     }
+    // }
+
+    public void createPortal(string handSide, Transform handTransform)
     {
-        if (handSide == "Right")
-        {
-            if (_playerPortals[1] != null)
-            {
-                GameObject.Destroy(_playerPortals[1]);
-            }
-
-            _playerPortals[1] = Instantiate(_portal, handPosition, handRotation);
-
-        }
-        else
-        {
-            if (_playerPortals[0] != null)
-            {
-                GameObject.Destroy(_playerPortals[0]);
-            }
-            _playerPortals[0] = Instantiate(_portal, handPosition, handRotation);
-
-        }
+        int side = handSide == "Right" ? 1 : 0;
+        //  _playerPortals[side].UpdatePortal(handTransform);
     }
 }
