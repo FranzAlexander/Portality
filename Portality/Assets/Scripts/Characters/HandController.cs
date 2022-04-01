@@ -6,29 +6,41 @@ using UnityEngine.XR.Interaction.Toolkit;
 [RequireComponent(typeof(ActionBasedController))]
 public class HandController : MonoBehaviour
 {
-    [SerializeField]
-    private Player _player;
     private ActionBasedController _controller;
 
-    private Transform _handPos;
+    private bool _createPortal;
 
-    [SerializeField]
-    private string _handSide;
+    private bool _placingPortal;
 
-    // Start is called before the first frame update
-    void Start()
+    public bool CreatePortal { get => _createPortal; set => _createPortal = value; }
+
+    public bool PlacingPortal { get => _placingPortal; }
+
+    private void Awake()
     {
         _controller = GetComponent<ActionBasedController>();
-        _handPos = GetComponent<Transform>();
+        _createPortal = false;
+        _placingPortal = false;
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (_controller.selectAction.action.IsPressed())
+        CheckInput();
+    }
+
+    public void CheckInput()
+    {
+        if (_controller.activateAction.action.IsPressed())
         {
-            Debug.Log("Grip trigger");
-            //_player.createPortal(_handSide, _handPos);
+            _placingPortal = true;
+        }
+
+        if (_controller.activateAction.action.WasReleasedThisFrame())
+        {
+            _placingPortal = false;
+            _createPortal = true;
         }
     }
+
 }

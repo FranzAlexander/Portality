@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class Player : MonoBehaviour
 {
@@ -21,6 +22,11 @@ public class Player : MonoBehaviour
     //     _playerPortals[1].OtherPortal = _playerPortals[0];
     // }
 
+    private void Awake()
+    {
+
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,10 +46,4 @@ public class Player : MonoBehaviour
     //         _playerPortals[i].RenderPortal();
     //     }
     // }
-
-    public void createPortal(string handSide, Transform handTransform)
-    {
-        int side = handSide == "Right" ? 1 : 0;
-        //  _playerPortals[side].UpdatePortal(handTransform);
-    }
 }
