@@ -17,8 +17,9 @@ public class PortalManager : MonoBehaviour
 
     private void Awake()
     {
-        _portals[0].OtherPortal = _portals[1];
-        _portals[1].OtherPortal = _portals[0];
+
+        // _portals[0].OtherPortal = _portals[1];
+        // _portals[1].OtherPortal = _portals[0];
 
         _previewPortals[0].SetActive(false);
         _previewPortals[1].SetActive(false);
@@ -42,13 +43,31 @@ public class PortalManager : MonoBehaviour
         {
             if (_handControllers[i].PlacingPortal)
             {
-                _previewPortals[i].transform.position = transform.TransformPoint(_handControllers[i].transform.position);
-                _previewPortals[i].transform.rotation = _handControllers[i].transform.rotation;
+                PlacePortalPreview(i);
 
                 if (!_previewPortals[i].activeInHierarchy)
                 {
                     _previewPortals[i].SetActive(true);
                 }
+            }
+            else
+            {
+                if (_previewPortals[i].activeInHierarchy)
+                {
+                    _previewPortals[i].SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void PlacePortalPreview(in int index)
+    {
+        if (_handControllers[index].PortalPreviewCanBePlaced())
+        {
+            if (_handControllers[index].Hit.normal == Vector3.up)
+            {
+                _previewPortals[index].transform.position = _handControllers[index].Hit.point;
+                _previewPortals[index].transform.rotation = Quaternion.Euler(new Vector3(0, _handControllers[index].transform.rotation.eulerAngles.z, 0));
             }
         }
     }
