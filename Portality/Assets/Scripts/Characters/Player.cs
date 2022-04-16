@@ -5,45 +5,41 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class Player : MonoBehaviour
 {
-    // [SerializeField]
-    // private Portal _portal;
+    private HandController[] _handController;
 
-    // // First index is left hand, second is for the right hand.
-    // private Portal[] _playerPortals;
+    [SerializeField]
+    private PortalManager _portalManager;
 
-    // private void Awake()
-    // {
-    //     _playerPortals = new Portal[2]
-    //     {
-    //         Instantiate(_portal, new Vector3(0, 0, 0), Quaternion.identity),
-    //         Instantiate(_portal, new Vector3(0, 0, 0), Quaternion.identity)
-    //     };
-    //     _playerPortals[0].OtherPortal = _playerPortals[1];
-    //     _playerPortals[1].OtherPortal = _playerPortals[0];
-    // }
+    private Quaternion _cameraRotation;
+
+    // Getters and setters.
+    public Quaternion CameraRotation { get => _cameraRotation; private set => _cameraRotation = value; }
 
     private void Awake()
     {
-
+        _handController = GetComponentsInChildren<HandController>();
+        _cameraRotation = transform.rotation;
     }
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-
+        CheckCreatePortal();
     }
 
-    // void OnPreCull()
-    // {
-    //     for (int i = 0; i < _playerPortals.Length; i++)
-    //     {
-    //         _playerPortals[i].RenderPortal();
-    //     }
-    // }
+    private void CheckCreatePortal()
+    {
+        for (int i = 0; i < _handController.Length; i++)
+        {
+            if (_handController[i].CreatePortal && _handController[i].PortalCanBePlaced())
+            {
+                _portalManager.PlacePortal(_handController[i].Hit, _cameraRotation, i);
+                _handController[i].CreatePortal = false;
+            }
+        }
+    }
 }

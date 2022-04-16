@@ -43,26 +43,6 @@ public class HandController : MonoBehaviour
         _controller.activateAction.action.Disable();
     }
 
-    // Update is called once per frame
-    private void Update()
-    {
-        //CheckInput();
-    }
-
-    // public void CheckInput()
-    // {
-    //     if (_controller.activateAction.action.IsPressed())
-    //     {
-    //         _placingPortal = true;
-    //     }
-
-    //     if (_controller.activateAction.action.WasReleasedThisFrame())
-    //     {
-    //         _placingPortal = false;
-    //         _createPortal = true;
-    //     }
-    // }
-
     private void ProjectPortalPlacement()
     {
         _placingPortal = true;
@@ -74,7 +54,7 @@ public class HandController : MonoBehaviour
         _createPortal = true;
     }
 
-    public bool PortalPreviewCanBePlaced()
+    public bool PortalCanBePlaced()
     {
         if (Physics.Raycast(transform.position, transform.forward, out _hit, _range))
         {
@@ -87,28 +67,8 @@ public class HandController : MonoBehaviour
         return false;
     }
 
-    // Old method.
-    // public void GetPortalPlacementPosition(ref Vector3 position, ref Quaternion rotation)
-    // {
-    //     RaycastHit hit;
-
-    //     if (Physics.Raycast(transform.position, transform.forward, out hit, _range))
-    //     {
-    //         if (hit.transform.gameObject.CompareTag("Environment"))
-    //         {
-    //             position = hit.point;
-
-    //             if (hit.normal == Vector3.up)
-    //             {
-
-    //                 rotation.y = transform.rotation.eulerAngles.y;
-    //             }
-
-    //             if (hit.normal == Vector3.right)
-    //             {
-    //                 rotation.Set(transform.position.x, 0f, 0f, 0f);
-    //             }
-    //         }
-    //     }
-    // }
+    public Quaternion GetHandRotation()
+    {
+        return transform.rotation;
+    }
 }

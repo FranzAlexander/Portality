@@ -1,67 +1,93 @@
+
 Shader "Unlit/Portal"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        [MainTexture] _MainTex ("MainTex", 2D) = "White" {}
     }
     SubShader
     {
-        Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
+        Tags 
+        {
+            "RenderType"="Transparent"
+            "Queue"="Transparent"
+            "RenderPipeline"="UniversalPipeline"
+            }
+        
         Lighting Off
+        LOD 100
         Cull Back
         ZWrite On
         ZTest Less
 
-        Fog{Mode Off}
-
-    Pass{
-        CGPROGRAM
-        #pragma vertex vert
-        #pragma fragment frag
-
-        #include "UnityCG.cginc"
-
-        struct appdata
+        pass
         {
-            float4 vertex : POSITION;
-            float4 uv : TEXCOORD0;
+            Name "PortalPass"
 
-            UNITY_VERTEX_INPUT_INSTANCE_ID
-        };
+            HLSLPROGRAM
 
-        struct v2f
-        {
-            float4 vertex : SV_POSITION;
-            float4 screenPos : TEXCOORD1;
+            #pragma multi_compile_instancing
 
-            UNITY_VERTEX_OUTPUT_STEREO
-        };
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            struct Attributes
+            {
+                float4 vertex : POSITION;
+
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            struct Varyings
+            {
+                float4 position : SV_POSITION; 
+                float4 uv : TEXCOORD0;
+
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+
+            Varyings vert(Attributes input)
+            {
+                Varyings output;
+                UNITY_SETUP_INSTANCE_ID(input);
+
+                // #if defined(UNITY_COMPILER_HLSL)
+                // #define UNITY_INITIALIZE_OUTPUT(type,name) name = (type)0;
+                // #else
+                // #define UNITY_INITIALIZE_OUTPUT(type,name)
+                // #endif
+
+                // UNITY_INITIALIZE_OUTPUT(Varyings, output);
+
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                output.position = TransformObjectToHClip(input.vertex.xyz);
+                output.uv = ComputeScreenPos(output.position);
+
+                #if UNITY_UV_STARTS_AT_TOP
+                output.position.y*= -1;
+                #endif
+
+                return output;
+            }
 
 
-        v2f vert(appdata v)
-        {
-            v2f o;
+           TEXTURE2D_X(_MainTex);
+           SAMPLER(sampler_MainTex);
 
-            UNITY_SETUP_INSTANCE_ID(v);
-            UNITY_INITIALIZE_OUTPUT(v2f, o);
-            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+            half4 frag(Varyings input) : SV_Target
+            {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-            o.vertex = UnityObjectToClipPos(v.vertex);
-            o.screenPos = ComputeScreenPos(o.vertex);
-            return o;
-        }
-        
-        sampler2D _MainTex;
+                float2 uv = input.uv.xy / input.uv.w;
 
+                float4 portalPosition = SAMPLE_TEXTURE2D_X(_MainTex, sampler_MainTex, uv); 
 
-        fixed4 frag(v2f i) : SV_Target
-        {
-            float2 uv = i.screenPos.xy / i.screenPos.w;
-            float4 portalCol = tex2D(_MainTex, uv);
-            return portalCol;
-        }
+                return portalPosition;
+            }
 
-        ENDCG
-    }    
+            ENDHLSL
+        } 
     }
 }

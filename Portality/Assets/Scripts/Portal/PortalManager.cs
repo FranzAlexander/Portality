@@ -1,91 +1,84 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class PortalManager : MonoBehaviour
 {
-    // Zero index is always left hand, First index is always right hand.
-
-    [SerializeField]
     private Portal[] _portals;
 
-    [SerializeField]
-    private GameObject[] _previewPortals;
-
-    [SerializeField]
-    private HandController[] _handControllers;
+    // Profiling.
+    //   private CustomSampler sampler;
 
     private void Awake()
     {
+        _portals = GetComponentsInChildren<Portal>();
 
-        // _portals[0].OtherPortal = _portals[1];
-        // _portals[1].OtherPortal = _portals[0];
+        if (_portals.Length == 2)
+        {
+            _portals[0].OtherPortal = _portals[1];
+            _portals[1].OtherPortal = _portals[0];
+        }
+        else
+        {
+            Debug.LogWarning("Wrong number of portals in the scene!");
+        }
 
-        _previewPortals[0].SetActive(false);
-        _previewPortals[1].SetActive(false);
     }
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
+        //        sampler = CustomSampler.Create("RenderPortalSampler");
 
+        RenderPipelineManager.beginCameraRendering += PortalMainCameraRender;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        PortalPreview();
+        RenderPipelineManager.beginCameraRendering -= PortalMainCameraRender;
     }
 
-    private void PortalPreview()
+    private void PortalMainCameraRender(ScriptableRenderContext context, Camera camera)
     {
-        for (int i = 0; i < _handControllers.Length; i += 1)
+        for (int i = 0; i < _portals.Length; i += 1)
         {
-            if (_handControllers[i].PlacingPortal)
-            {
-                PlacePortalPreview(i);
+            _portals[i].RenderPortal(context);
 
-                if (!_previewPortals[i].activeInHierarchy)
-                {
-                    _previewPortals[i].SetActive(true);
-                }
-            }
-            else
-            {
-                if (_previewPortals[i].activeInHierarchy)
-                {
-                    _previewPortals[i].SetActive(false);
-                }
-            }
         }
     }
 
-    private void PlacePortalPreview(in int index)
+    public void PlacePortal(RaycastHit hit, Quaternion cameraRotation, int portalIndex)
     {
-        if (_handControllers[index].PortalPreviewCanBePlaced())
-        {
-            if (_handControllers[index].Hit.normal == Vector3.up)
-            {
-                _previewPortals[index].transform.position = _handControllers[index].Hit.point;
-                _previewPortals[index].transform.rotation = Quaternion.Euler(new Vector3(0, _handControllers[index].transform.rotation.eulerAngles.z, 0));
-            }
-        }
+        _portals[portalIndex].transform.up = hit.normal;
+        //_portals[portalIndex].transform.rotation = Quaternion.LookRotation(hit.normal);
+        _portals[portalIndex].transform.position = hit.point;
     }
 
-    private void CreatePortal()
+    private void CheckValidPositions()
     {
-        for (int i = 0; i < _handControllers.Length; i += 1)
+        Vector3[] points =
         {
-            if (_handControllers[i].CreatePortal)
-            {
-                _portals[i].SetTransformFromPreview(_previewPortals[i].transform);
+            new Vector3(-1.1f, 0.0f, 0.1f),
+            new Vector3(1.1f, 0.0f, 0.1f),
+            new Vector3( 0.0f, -2.1f, 0.1f),
+            new Vector3( 0.0f,  2.1f, 0.1f)
+        };
 
-                if (_previewPortals[i].activeInHierarchy)
-                {
-                    _previewPortals[i].SetActive(false);
-                }
-                _portals[i].SetPortalActive(true);
-            }
+        Vector3[] dirs =
+        {
+            Vector3.right,
+            -Vector3.right,
+             Vector3.up,
+            -Vector3.up
+        };
+
+        for (int i = 0; i < 4; i += 1)
+        {
+
         }
     }
 }
