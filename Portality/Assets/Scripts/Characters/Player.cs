@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
         {
             if (_handController[i].CreatePortal && _handController[i].PortalCanBePlaced())
             {
-                _portalManager.PlacePortal(_handController[i].Hit, _cameraRotation, i);
+                _portalManager.PlacePortal(_handController[i].Hit, i);
                 _handController[i].CreatePortal = false;
             }
         }

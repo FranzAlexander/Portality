@@ -3,38 +3,43 @@ Shader "Unlit/Portal"
 {
     Properties
     {
-        [MainTexture] _MainTex ("MainTex", 2D) = "White" {}
+        [MainTexture] _MainTex ("_MainTex", 2D) = "White"
     }
     SubShader
     {
         Tags 
-        {
-            "RenderType"="Transparent"
+        {           
+            "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "Transparent"
+            "UniversalMaterialType" = "Unlit"
             "Queue"="Transparent"
-            "RenderPipeline"="UniversalPipeline"
-            }
+        }
         
-        Lighting Off
-        LOD 100
-        Cull Back
-        ZWrite On
-        ZTest Less
-
         pass
         {
             Name "PortalPass"
 
+            Cull Back
+            ZTest Less
+            ZWrite On
+
             HLSLPROGRAM
 
+            #pragma target 4.5
+            #pragma exclude_renderers gles gles3 glcore
             #pragma multi_compile_instancing
-
+            #pragma multi_compile_fog
+            #pragma instancing_options renderinglayer
+            #pragma multi_compile _ DOTS_INSTANCING_ON
             #pragma vertex vert
             #pragma fragment frag
+            
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             struct Attributes
             {
                 float4 vertex : POSITION;
+                float4  uv : TEXCOORD0;
 
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
@@ -47,6 +52,7 @@ Shader "Unlit/Portal"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
+      
             Varyings vert(Attributes input)
             {
                 Varyings output;
@@ -65,16 +71,17 @@ Shader "Unlit/Portal"
                 output.position = TransformObjectToHClip(input.vertex.xyz);
                 output.uv = ComputeScreenPos(output.position);
 
-                #if UNITY_UV_STARTS_AT_TOP
-                output.position.y*= -1;
-                #endif
+                // #if UNITY_UV_STARTS_AT_TOP
+                // output.position.y*= -1;
+                // #endif
 
                 return output;
             }
 
-
+      
            TEXTURE2D_X(_MainTex);
            SAMPLER(sampler_MainTex);
+
 
             half4 frag(Varyings input) : SV_Target
             {

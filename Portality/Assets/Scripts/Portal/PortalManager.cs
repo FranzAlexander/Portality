@@ -10,8 +10,13 @@ public class PortalManager : MonoBehaviour
 {
     private Portal[] _portals;
 
+    // Holds the current teleportable objects.
+    private List<Teleportable> _teleportables;
+
+    public List<Teleportable> Teleportables { get => _teleportables; private set => _teleportables = value; }
+
     // Profiling.
-    //   private CustomSampler sampler;
+    private CustomSampler sampler;
 
     private void Awake()
     {
@@ -27,15 +32,24 @@ public class PortalManager : MonoBehaviour
             Debug.LogWarning("Wrong number of portals in the scene!");
         }
 
+        _teleportables = new List<Teleportable>();
+
     }
 
     // Start is called before the first frame update
     private void Start()
     {
-        //        sampler = CustomSampler.Create("RenderPortalSampler");
+        sampler = CustomSampler.Create("RenderPortalSampler");
 
         RenderPipelineManager.beginCameraRendering += PortalMainCameraRender;
     }
+
+    // private void FixedUpdate()
+    // {
+    //     for (int i = 0; i < _teleportables.Count; ++i)
+    //     {
+    //     }
+    // }
 
     private void OnDisable()
     {
@@ -44,17 +58,19 @@ public class PortalManager : MonoBehaviour
 
     private void PortalMainCameraRender(ScriptableRenderContext context, Camera camera)
     {
+        sampler.Begin();
         for (int i = 0; i < _portals.Length; i += 1)
         {
             _portals[i].RenderPortal(context);
 
         }
+        sampler.End();
     }
 
-    public void PlacePortal(RaycastHit hit, Quaternion cameraRotation, int portalIndex)
+    public void PlacePortal(RaycastHit hit, int portalIndex)
     {
         _portals[portalIndex].transform.up = hit.normal;
-        //_portals[portalIndex].transform.rotation = Quaternion.LookRotation(hit.normal);
+
         _portals[portalIndex].transform.position = hit.point;
     }
 
