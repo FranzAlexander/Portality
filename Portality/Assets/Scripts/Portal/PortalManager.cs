@@ -36,9 +36,6 @@ public class PortalManager : MonoBehaviour
 
     private void Start()
     {
-        _portals[0].PortalTextureSetup(_portals[1]);
-        _portals[1].PortalTextureSetup(_portals[0]);
-
         RenderPipelineManager.beginCameraRendering += PortalMainCameraRender;
     }
 

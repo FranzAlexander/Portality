@@ -51,6 +51,11 @@ public class Portal : MonoBehaviour
         _teleportables = new List<Teleportable>();
     }
 
+    private void Start()
+    {
+        PortalTextureSetup();
+    }
+
     private void LateUpdate()
     {
         for (int i = 0; i < _teleportables.Count; ++i)
@@ -60,7 +65,7 @@ public class Portal : MonoBehaviour
     }
 
     // Sets render texture for the camera and portal.
-    public void PortalTextureSetup(Portal otherPortal)
+    public void PortalTextureSetup()
     {
         if (_portalCam.targetTexture != null)
         {
@@ -70,25 +75,45 @@ public class Portal : MonoBehaviour
         _viewTexture = new RenderTexture(Screen.width, Screen.height, 24);
         _portalCam.targetTexture = _viewTexture;
 
-        otherPortal.PortalScreen.material.SetTexture("_MainTex", _viewTexture);
+        _otherPortal.PortalScreen.material.SetTexture("MainTex", _viewTexture);
     }
 
     public void RenderPortal(ScriptableRenderContext context, bool floor)
     {
-        _portalCam.projectionMatrix = _playerCam.projectionMatrix;
+        if (!PortalVisableByCamera()) { return; }
 
+        Matrix4x4 cameraMatrix;
+        Vector3 cameraPosition;
+        _portalCam.projectionMatrix = _playerCam.projectionMatrix;
 
         for (int i = 0; i < _recursionLimit; ++i)
         {
-            _portalCameraPositions[i] = transform.TransformPoint(_otherPortal.transform.InverseTransformPoint(_playerCam.transform.position));
-
-            _portalCameraRotations[i] = transform.rotation * Quaternion.Inverse(_otherPortal.transform.rotation) * _playerCam.transform.rotation;
+            cameraMatrix = transform.localToWorldMatrix * _otherPortal.transform.worldToLocalMatrix * _playerCam.transform.localToWorldMatrix;
+            cameraPosition = cameraMatrix.GetPosition();
+            cameraPosition.y = cameraPosition.y * -transform.up.y;
+            // _portalCameraPositions[i] = Vector3.Scale(transform.TransformPoint(_otherPortal.transform.InverseTransformPoint(_playerCam.transform.position)), -Vector3.up);
+            //  Vector3 cameraPosition = transform.TransformPoint(_otherPortal.transform.InverseTransformPoint(_playerCam.transform.position));
+            _portalCameraPositions[i] = cameraPosition;
+            // transform.rotation * Quaternion.Inverse(_otherPortal.transform.rotation) * _playerCam.transform.rotation;
+            _portalCameraRotations[i] = cameraMatrix.rotation;
         }
 
         for (int i = 0; i < _recursionLimit; ++i)
         {
             _portalCam.transform.position = _portalCameraPositions[i];
             _portalCam.transform.rotation = _portalCameraRotations[i];
+
+            // Setting the camera's oblique view frustum.
+            Vector3 cameraSpaceNormal = _portalCam.worldToCameraMatrix.MultiplyVector(transform.up) * System.Math.Sign(Vector3.Dot(transform.up, transform.position - _portalCam.transform.position));
+
+            _portalCam.projectionMatrix = _playerCam.CalculateObliqueMatrix(new Vector4(
+                cameraSpaceNormal.x,
+                cameraSpaceNormal.y,
+                cameraSpaceNormal.z,
+                (-Vector3.Dot(_portalCam.worldToCameraMatrix.MultiplyPoint(transform.position), cameraSpaceNormal) + 0.05f)));
+
+            // Vector3 cameraSpacePosition = _portalCam.worldToCameraMatrix.MultiplyPoint(transform.position);
+            // float cameraSpaceDestination = -Vector3.Dot(cameraSpacePosition, cameraSpaceNormal) + 0.05f;
 
             UniversalRenderPipeline.RenderSingleCamera(context, _portalCam);
         }
@@ -112,5 +137,10 @@ public class Portal : MonoBehaviour
         {
             _teleportables.Remove(newTeleportable);
         }
+    }
+
+    private bool PortalVisableByCamera()
+    {
+        return GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(_playerCam), _otherPortal.PortalScreen.bounds);
     }
 }

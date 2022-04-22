@@ -44,19 +44,45 @@ public class Teleportable : MonoBehaviour
         _teleportableClone.SetActive(false);
     }
 
+    private void LateUpdate()
+    {
+        if (_teleportableClone.activeSelf)
+        {
+            _teleportableClone.transform.position = oldPosition;
+            _teleportableClone.transform.rotation = oldRotation;
+        }
+    }
+
     public void Teleport(Transform source, Transform destination)
     {
-        Vector3 relativePosition = source.InverseTransformPoint(transform.position);
-        transform.position = destination.TransformPoint(relativePosition);
+        Vector3 portalOffset = transform.position - source.transform.position;
 
-        oldPosition = relativePosition;
+        if (Vector3.Dot(transform.up, portalOffset) < 0f)
+        {
+            Matrix4x4 prMatrix = destination.localToWorldMatrix * source.worldToLocalMatrix * transform.localToWorldMatrix;
+            oldPosition = transform.position;
+            oldRotation = transform.rotation;
 
-        Quaternion relativeRotation = Quaternion.Inverse(source.rotation) * transform.rotation;
-        transform.rotation = destination.rotation * relativeRotation;
+            transform.position = prMatrix.GetPosition();
+            transform.rotation = prMatrix.rotation;
+        }
 
-        oldRotation = relativeRotation;
+        // Vector3 relativePosition = source.TransformPoint(transform.position);
+        // transform.position = destination.InverseTransformPoint(relativePosition);
 
-        Vector3 relativeVelocity = source.InverseTransformDirection(_rigidbody.velocity);
-        _rigidbody.velocity = destination.TransformDirection(relativeVelocity);
+        // oldPosition = relativePosition;
+
+        // Quaternion relativeRotation = Quaternion.Inverse(source.rotation) * transform.rotation;
+        // transform.rotation = destination.rotation * relativeRotation;
+
+        // oldRotation = relativeRotation;
+
+        // Vector3 relativeVelocity = source.TransformDirection(_rigidbody.velocity);
+        // _rigidbody.velocity = destination.InverseTransformDirection(relativeVelocity);
+    }
+
+    private void OnDestroy()
+    {
+        GameObject.Destroy(_teleportableClone);
     }
 }
