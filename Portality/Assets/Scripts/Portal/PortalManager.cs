@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 public class PortalManager : MonoBehaviour
@@ -11,6 +12,9 @@ public class PortalManager : MonoBehaviour
     private const int _otherPortalIndex = 1;
 
     private bool _onFloor;
+
+    private CustomSampler sampler;
+
 
     private void Awake()
     {
@@ -36,15 +40,19 @@ public class PortalManager : MonoBehaviour
 
     private void Start()
     {
+        sampler = CustomSampler.Create("RenderPortalSampler");
+
         RenderPipelineManager.beginCameraRendering += PortalMainCameraRender;
     }
 
     private void PortalMainCameraRender(ScriptableRenderContext context, Camera camera)
     {
+        sampler.Begin();
         for (int i = 0; i < _portals.Length; ++i)
         {
             _portals[i].RenderPortal(context, _onFloor);
         }
+        sampler.End();
     }
 
     // hit normal on ground 0, 1, 0

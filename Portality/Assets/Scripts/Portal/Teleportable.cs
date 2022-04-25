@@ -8,6 +8,8 @@ public class Teleportable : MonoBehaviour
 
     private Rigidbody _rigidbody;
 
+    private bool _bothPortalsActive;
+
     private Vector3 oldPosition;
     private Quaternion oldRotation;
 
@@ -18,6 +20,8 @@ public class Teleportable : MonoBehaviour
         CreateObjectClone();
 
         _rigidbody = GetComponent<Rigidbody>();
+
+        _bothPortalsActive = false;
     }
 
     private void CreateObjectClone()
@@ -34,8 +38,9 @@ public class Teleportable : MonoBehaviour
         _teleportableClone.transform.localScale = transform.localScale;
     }
 
-    public void EnterPortal()
+    public void EnterPortal(bool bothPortalsActive)
     {
+        _bothPortalsActive = bothPortalsActive;
         _teleportableClone.SetActive(true);
     }
 
@@ -46,7 +51,9 @@ public class Teleportable : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_teleportableClone.activeSelf)
+        if (!_bothPortalsActive) { return; }
+
+        if (_teleportableClone.activeSelf && _bothPortalsActive)
         {
             _teleportableClone.transform.position = oldPosition;
             _teleportableClone.transform.rotation = oldRotation;
@@ -65,6 +72,11 @@ public class Teleportable : MonoBehaviour
 
             transform.position = prMatrix.GetPosition();
             transform.rotation = prMatrix.rotation;
+
+            Vector3 relativeVelocity = source.TransformDirection(_rigidbody.velocity);
+            relativeVelocity = Quaternion.Euler(0.0f, 180.0f, 0.0f) * relativeVelocity;
+            _rigidbody.velocity = destination.InverseTransformDirection(relativeVelocity);
+
         }
 
         // Vector3 relativePosition = source.TransformPoint(transform.position);
